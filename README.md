@@ -22,6 +22,23 @@ npm install
 npm start
 ```
 
+## Timezone approach
+
+This project uses a free, offline-friendly approach to map locations to IANA timezones:
+
+- Geocoding: Nominatim (OpenStreetMap) — free service, please respect their usage policy and include a valid User-Agent.
+- Timezone mapping: `tz-lookup` — local mapping from lat/lon to IANA timezone.
+
+### Test locally (quick)
+
+Run the small test runner which geocodes a sample location and asserts expected results:
+
+```bash
+npm test
+```
+
+This runs `scripts/test-runner.js` and will exit with a non-zero code if assertions fail.
+
 ### Available Tools
 
 #### `get_time`
@@ -54,7 +71,7 @@ For a complete list of IANA timezones, see: https://en.wikipedia.org/wiki/List_o
 
 ## MCP Configuration
 
-To use this server with an MCP client (like Claude Desktop), add it to your MCP settings:
+To use this server with an MCP client, add it to your MCP settings:
 
 ```json
 {

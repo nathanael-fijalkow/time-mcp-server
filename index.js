@@ -6,6 +6,7 @@ import {
   CallToolRequestSchema,
   ListToolsRequestSchema,
 } from "@modelcontextprotocol/sdk/types.js";
+import { handleGetTime, handleGetTimezone } from './lib/tools.js';
 
 // Create server instance
 const server = new Server(
@@ -38,53 +39,31 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
           required: ["timezone"],
         },
       },
+      {
+        name: "get_timezone",
+        description: "Get the timezone from a given location. The timezone is in IANA format (e.g., 'America/New_York', 'Europe/London', 'Asia/Tokyo')",
+        inputSchema: {
+          type: "object",
+          properties: {
+            location: {
+              type: "string",
+              description: "A location (city, country, region, specific address)",
+            },
+          },
+          required: ["location"],
+        },
+      },
     ],
   };
 });
 
-// Handle tool calls
+
+// Handle tool calls by delegating to encapsulated functions
 server.setRequestHandler(CallToolRequestSchema, async (request) => {
   const { name, arguments: args } = request.params;
 
-  if (name === "get_time") {
-    const timezone = args.timezone;
-
-    try {
-      // Get current time in the specified timezone
-      const now = new Date();
-      const formatter = new Intl.DateTimeFormat("en-US", {
-        timeZone: timezone,
-        year: "numeric",
-        month: "long",
-        day: "numeric",
-        hour: "2-digit",
-        minute: "2-digit",
-        second: "2-digit",
-        timeZoneName: "long",
-      });
-
-      const formattedTime = formatter.format(now);
-
-      return {
-        content: [
-          {
-            type: "text",
-            text: `Current time in ${timezone}:\n${formattedTime}`,
-          },
-        ],
-      };
-    } catch (error) {
-      return {
-        content: [
-          {
-            type: "text",
-            text: `Error: Invalid timezone '${timezone}'. Please use a valid IANA timezone format (e.g., 'America/New_York', 'Europe/London', 'Asia/Tokyo').`,
-          },
-        ],
-        isError: true,
-      };
-    }
-  }
+  if (name === "get_time") return await handleGetTime(args);
+  if (name === "get_timezone") return await handleGetTimezone(args);
 
   throw new Error(`Unknown tool: ${name}`);
 });
